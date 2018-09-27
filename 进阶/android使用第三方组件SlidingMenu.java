@@ -12,6 +12,7 @@
 6.修改项目的module依赖，将SlidingMenu的依赖添加到项目中
 
 //注意事项：滑动菜单必须是另一个activity，也就是主页面一个activity，滑动菜单是另一个activity
+//引入module的lib中的suportv4必须一致
 
 //settings.gradle
 include ':app'
