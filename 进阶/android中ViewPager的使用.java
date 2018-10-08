@@ -154,8 +154,8 @@ public class GuideActivity extends Activity implements ViewPager.OnPageChangeLis
     private ViewPager vp;
     private ViewPagerActivity vpAdapter;
     private List<View> views;
-    private ImageView[] dots;
-    private int[] ids = {
+    private ImageView[] dots;  //创建图片数组
+    private int[] ids = {      //创建图片id数组
             R.id.point_first,
             R.id.point_second,
             R.id.point_third,
@@ -187,8 +187,8 @@ public class GuideActivity extends Activity implements ViewPager.OnPageChangeLis
         vp.setOnPageChangeListener(this);
     }
 
-    private void initDots() {
-        dots = new ImageView[views.size()];
+    private void initDots() {  //初始化导航点图片数组
+        dots = new ImageView[views.size()];  //创建图片视图数组长度
         for(int i = 0;i < views.size();i++) {
             dots[i] = (ImageView) findViewById(ids[i]);
         }
@@ -200,10 +200,10 @@ public class GuideActivity extends Activity implements ViewPager.OnPageChangeLis
     }
 
     @Override
-    public void onPageSelected(int i) {
+    public void onPageSelected(int i) {   //在ViewPager选择发生改变时触发的事件
         for(int j = 0;j < ids.length;j++) {
             if(i == j) {
-                dots[j].setImageResource(R.drawable.light);
+                dots[j].setImageResource(R.drawable.light);  //设置图片的资源
             }
             else {
                 dots[j].setImageResource(R.drawable.no_light);
@@ -226,4 +226,70 @@ public void onClick(View v) {
     Intent i = new Intent(GuideActivity.this,GuideMain.class);
     startActivity(i);
     finish();
+}
+
+//使用本地变量决定是进入导航页还是主页面
+
+public class WelcomeActivity extends Activity {
+
+    private static final int GO_HOME = 1000;
+    private static final int GO_GUIDE = 1001;
+    private static final int TIME = 1000;
+    private Boolean isFirstIn = false;
+    @SuppressLint("HandlerLeak")
+    private Handler mhandler = new Handler() {  //创建handler对象
+        public void handleMessage(android.os.Message msg) {  //创建处理消息的函数
+            switch(msg.what) {
+                case GO_HOME:
+                    goHome();  //跳转到主页
+                    break;
+                case GO_GUIDE:
+                    goGuide();  //跳转到导航页
+                    break;
+            }
+        }
+    };
+
+    protected void onCreate(Bundle saveInstance) {
+        super.onCreate(saveInstance);
+        setContentView(R.layout.activity_welcome);
+        init();
+    }
+
+    public void init() {
+        // 此方法接收两个参数，第一个参数用于指定SharedPreferences文件的名称（格式为xml文件），
+        // 如果指定的文件不存在则会创建一个。SharedPreferences文件都是存放在/data/data/<packagename>/shared_prefs/
+        // 目录下的；第二个参数用于指定操作模式：
+        // MODE_PRIVATE：默认操作模式，和直接传0效果相同，表示只有当前应用程序才可以对这个SharedPreferences文件进行读写
+        // MODE_WORLD_READABLE：指定此SharedPreferences对其他程序只读且无法修改。
+        // MODE_WORLD_WRITEABLE：指定此SharedPreferences能被其他程序读写。
+        SharedPreferences perPreferences = getSharedPreferences("jike",MODE_PRIVATE);
+        isFirstIn = perPreferences.getBoolean("isFirstIn",true);
+        if(!isFirstIn) {
+            mhandler.sendEmptyMessageDelayed(GO_HOME,TIME);
+        }
+        else {
+            mhandler.sendEmptyMessageDelayed(GO_GUIDE,TIME);
+            // 调用SharedPreferences对象的edit()方法来获取一个SharedPreferences.Editor对象
+            SharedPreferences.Editor editor = perPreferences.edit();
+            // 向SharedPreferences.Editor对象中添加数据，比如添加一个布尔型数据就使用putBoolean方法，
+            // 添加一个字符串就用putString()方法，以此类推
+            editor.putBoolean("isFirstIn",false);
+            // 调用commit()方法将添加的数据提交，从而完成数据存储操作
+            editor.commit();
+        }
+    }
+
+    private void goHome() {
+        Intent i = new Intent(WelcomeActivity.this,GuideMain.class);
+        startActivity(i);
+        finish();
+    }
+
+    private void goGuide() {
+        Intent i = new Intent(WelcomeActivity.this,GuideActivity.class);
+        startActivity(i);
+        finish();
+    }
+
 }
