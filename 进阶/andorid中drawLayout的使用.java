@@ -162,3 +162,296 @@ public class ContentFragment extends Fragment {
         return view;  //返回视图
     }
 }
+
+//当滑动侧边菜单栏时改动应用顶部的标题
+
+public class DrawLayout extends AppCompatActivity implements AdapterView.OnItemClickListener {
+
+    private DrawerLayout drawLayout;
+    private ListView listView;
+    private ArrayAdapter<String> arrayAdapter;
+    private ArrayList<String> menuList;
+    private ActionBarDrawerToggle mDrawToggle;
+    private String title;
+
+    protected void onCreate(Bundle saveInstanceState) {
+        super.onCreate(saveInstanceState);
+        setContentView(R.layout.activity_drawlayout);
+        title = (String) getTitle();  //保存应用的原本标题
+        drawLayout = (DrawerLayout) findViewById(R.id.drawLayout);
+        listView = (ListView) findViewById(R.id.listView);
+        menuList = new ArrayList<String>();
+        for(int i = 0;i< 5;i++) {
+            menuList.add("极客学院"+i);
+        }
+        arrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,menuList);
+        listView.setAdapter(arrayAdapter);
+        listView.setOnItemClickListener(this);
+        //注意此处的ActionBarDrawerToggle的引用包,必须使用support.v4的
+        //import android.support.v4.app.ActionBarDrawerToggle
+        //创建侧滑菜单栏被滑动时的监听对象
+        mDrawToggle = new ActionBarDrawerToggle(this,drawLayout,R.drawable.ic_drawer,R.string.draw_open,R.string.draw_close) {
+            public void onDrawerOpened(View drawerView) {  //重写侧滑菜单栏被打开时
+                super.onDrawerOpened(drawerView);
+                getSupportActionBar().setTitle("请选择");
+            }
+            public void onDrawerClosed(View drawerView) {  //重写侧滑菜单栏被关闭时
+                super.onDrawerClosed(drawerView);
+                getSupportActionBar().setTitle(title);  //获取actionBar并设置标题
+            }
+        };
+        drawLayout.setDrawerListener(mDrawToggle);
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        ContentFragment contentFragment = new ContentFragment();
+        Bundle args = new Bundle();
+        args.putString("text",menuList.get(position));
+        contentFragment.setArguments(args);
+        FragmentManager fm = getFragmentManager();
+        fm.beginTransaction().replace(R.id.frameLayout,contentFragment).commit();
+        drawLayout.closeDrawer(listView);
+    }
+}
+
+//当侧滑菜单栏出现时隐藏顶部的图标,当侧滑菜单栏隐藏时展示顶部的图标
+
+//menu.xml
+
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_websearch"
+        android:icon="@drawable/search"
+        android:title="@string/websearch"
+        app:showAsAction="ifRoom|withText" />
+
+</menu>
+
+//DrawLayout.java
+
+public class DrawLayout extends AppCompatActivity implements AdapterView.OnItemClickListener {
+
+    private DrawerLayout drawLayout;
+    private ListView listView;
+    private ArrayAdapter<String> arrayAdapter;
+    private ArrayList<String> menuList;
+    private ActionBarDrawerToggle mDrawToggle;
+    private String title;
+
+    protected void onCreate(Bundle saveInstanceState) {
+        super.onCreate(saveInstanceState);
+        setContentView(R.layout.activity_drawlayout);
+        title = (String) getTitle();
+        drawLayout = (DrawerLayout) findViewById(R.id.drawLayout);
+        listView = (ListView) findViewById(R.id.listView);
+        menuList = new ArrayList<String>();
+        for(int i = 0;i< 5;i++) {
+            menuList.add("极客学院"+i);
+        }
+        arrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,menuList);
+        listView.setAdapter(arrayAdapter);
+        listView.setOnItemClickListener(this);
+        mDrawToggle = new ActionBarDrawerToggle(this,drawLayout,R.drawable.ic_drawer,R.string.draw_open,R.string.draw_close) {
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                getSupportActionBar().setTitle("请选择");
+                invalidateOptionsMenu();  //通知系统刷新菜单
+            }
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+                getSupportActionBar().setTitle(title);
+                invalidateOptionsMenu();
+            }
+        };
+        drawLayout.setDrawerListener(mDrawToggle);
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        ContentFragment contentFragment = new ContentFragment();
+        Bundle args = new Bundle();
+        args.putString("text",menuList.get(position));
+        contentFragment.setArguments(args);
+        FragmentManager fm = getFragmentManager();
+        fm.beginTransaction().replace(R.id.frameLayout,contentFragment).commit();
+        drawLayout.closeDrawer(listView);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main,menu);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        boolean isDrawOpen = drawLayout.isDrawerOpen(listView);  //判断侧滑菜单栏是否已经打开
+        menu.findItem(R.id.action_websearch).setVisible(!isDrawOpen);  //在顶部菜单栏中找到搜索的按钮，然后设置该元素的是否显示或者隐藏
+        return super.onPrepareOptionsMenu(menu);
+    }
+}
+
+//给顶部的搜索按钮添加点击跳转到Internet
+
+public class DrawLayout extends AppCompatActivity implements AdapterView.OnItemClickListener {
+
+    private DrawerLayout drawLayout;
+    private ListView listView;
+    private ArrayAdapter<String> arrayAdapter;
+    private ArrayList<String> menuList;
+    private ActionBarDrawerToggle mDrawToggle;
+    private String title;
+
+    protected void onCreate(Bundle saveInstanceState) {
+        super.onCreate(saveInstanceState);
+        setContentView(R.layout.activity_drawlayout);
+        title = (String) getTitle();
+        drawLayout = (DrawerLayout) findViewById(R.id.drawLayout);
+        listView = (ListView) findViewById(R.id.listView);
+        menuList = new ArrayList<String>();
+        for(int i = 0;i< 5;i++) {
+            menuList.add("极客学院"+i);
+        }
+        arrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,menuList);
+        listView.setAdapter(arrayAdapter);
+        listView.setOnItemClickListener(this);
+        mDrawToggle = new ActionBarDrawerToggle(this,drawLayout,R.drawable.ic_drawer,R.string.draw_open,R.string.draw_close) {
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                getSupportActionBar().setTitle("请选择");
+                invalidateOptionsMenu();
+            }
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+                getSupportActionBar().setTitle(title);
+                invalidateOptionsMenu();
+            }
+        };
+        drawLayout.setDrawerListener(mDrawToggle);
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        ContentFragment contentFragment = new ContentFragment();
+        Bundle args = new Bundle();
+        args.putString("text",menuList.get(position));
+        contentFragment.setArguments(args);
+        FragmentManager fm = getFragmentManager();
+        fm.beginTransaction().replace(R.id.frameLayout,contentFragment).commit();
+        drawLayout.closeDrawer(listView);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main,menu);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        boolean isDrawOpen = drawLayout.isDrawerOpen(listView);
+        menu.findItem(R.id.action_websearch).setVisible(!isDrawOpen);
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()) {
+            case R.id.action_websearch:
+                Intent intent = new Intent();
+                intent.setAction("android.intent.action.VIEW");
+                Uri uri = Uri.parse("http://www.baidu.com");
+                intent.setData(uri);
+                startActivity(intent);
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+}
+
+//点击顶部的左上角使得侧滑菜单栏消失
+
+public class DrawLayout extends AppCompatActivity implements AdapterView.OnItemClickListener {
+
+    private DrawerLayout drawLayout;
+    private ListView listView;
+    private ArrayAdapter<String> arrayAdapter;
+    private ArrayList<String> menuList;
+    private ActionBarDrawerToggle mDrawToggle;
+    private String title;
+
+    protected void onCreate(Bundle saveInstanceState) {
+        super.onCreate(saveInstanceState);
+        setContentView(R.layout.activity_drawlayout);
+        title = (String) getTitle();
+        drawLayout = (DrawerLayout) findViewById(R.id.drawLayout);
+        listView = (ListView) findViewById(R.id.listView);
+        menuList = new ArrayList<String>();
+        for(int i = 0;i< 5;i++) {
+            menuList.add("极客学院"+i);
+        }
+        arrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,menuList);
+        listView.setAdapter(arrayAdapter);
+        listView.setOnItemClickListener(this);
+        mDrawToggle = new ActionBarDrawerToggle(this,drawLayout,R.drawable.ic_drawer,R.string.draw_open,R.string.draw_close) {
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                getSupportActionBar().setTitle("请选择");
+                invalidateOptionsMenu();
+            }
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+                getSupportActionBar().setTitle(title);
+                invalidateOptionsMenu();
+            }
+        };
+        drawLayout.setDrawerListener(mDrawToggle);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        ContentFragment contentFragment = new ContentFragment();
+        Bundle args = new Bundle();
+        args.putString("text",menuList.get(position));
+        contentFragment.setArguments(args);
+        FragmentManager fm = getFragmentManager();
+        fm.beginTransaction().replace(R.id.frameLayout,contentFragment).commit();
+        drawLayout.closeDrawer(listView);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main,menu);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        boolean isDrawOpen = drawLayout.isDrawerOpen(listView);
+        menu.findItem(R.id.action_websearch).setVisible(!isDrawOpen);
+        return super.onPrepareOptionsMenu(menu);
+    }
+    //如果当侧滑菜单栏出现时，顶部的返回图标将会出现
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(mDrawToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
+        switch(item.getItemId()) {
+            case R.id.action_websearch:
+                Intent intent = new Intent();
+                intent.setAction("android.intent.action.VIEW");
+                Uri uri = Uri.parse("http://www.baidu.com");
+                intent.setData(uri);
+                startActivity(intent);
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+}
