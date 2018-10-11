@@ -455,3 +455,117 @@ public class DrawLayout extends AppCompatActivity implements AdapterView.OnItemC
     }
 
 }
+
+//需要将ActionDrawerToggle与DrawerLayout的状态同步
+//将ActionBarDrawerToggle中的drawer图标，设置为ActionBar中的Home-Button的icon
+
+@Override
+protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+    super.onPostCreate(savedInstanceState);
+    mDrawToggle.syncState();
+}
+
+public void onConfigurationChanged(Configuration newConfig) {
+    super.onConfigurationChanged(newConfig);
+    mDrawToggle.onConfigurationChanged(newConfig);
+}
+
+//使用注意事项
+
+1.当getActionBar()出现空指针时首先要考虑是否在style.xml中出现noAction的字样或者noTitle的值为true
+2.删除有关出现的字样
+3.将style.xml中的style节点中的parent的值修改为android:Theme.Holo.Light.DarkActionBar，这样应用顶部的
+  actionBar的样式就会被修改为黑色的主题色
+4.将extends AppCompatActivity修改为Activity,这样就可以把getSupportActionBar()修改为getActionBar()
+
+public class DrawLayout extends Activity implements AdapterView.OnItemClickListener {
+
+    private DrawerLayout drawLayout;
+    private ListView listView;
+    private ArrayAdapter<String> arrayAdapter;
+    private ArrayList<String> menuList;
+    private ActionBarDrawerToggle mDrawToggle;
+    private String title;
+
+    protected void onCreate(Bundle saveInstanceState) {
+        super.onCreate(saveInstanceState);
+        setContentView(R.layout.activity_drawlayout);
+        title = (String) getTitle();
+        drawLayout = (DrawerLayout) findViewById(R.id.drawLayout);
+        listView = (ListView) findViewById(R.id.listView);
+        menuList = new ArrayList<String>();
+        for(int i = 0;i< 5;i++) {
+            menuList.add("极客学院"+i);
+        }
+        arrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,menuList);
+        listView.setAdapter(arrayAdapter);
+        listView.setOnItemClickListener(this);
+        mDrawToggle = new ActionBarDrawerToggle(this,drawLayout,R.drawable.ic_drawer,R.string.draw_open,R.string.draw_close) {
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                getActionBar().setTitle("请选择");
+                invalidateOptionsMenu();
+            }
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+                getActionBar().setTitle(title);
+                invalidateOptionsMenu();
+            }
+        };
+        drawLayout.setDrawerListener(mDrawToggle);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setHomeButtonEnabled(true);
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        ContentFragment contentFragment = new ContentFragment();
+        Bundle args = new Bundle();
+        args.putString("text",menuList.get(position));
+        contentFragment.setArguments(args);
+        FragmentManager fm = getFragmentManager();
+        fm.beginTransaction().replace(R.id.frameLayout,contentFragment).commit();
+        drawLayout.closeDrawer(listView);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main,menu);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        boolean isDrawOpen = drawLayout.isDrawerOpen(listView);
+        menu.findItem(R.id.action_websearch).setVisible(!isDrawOpen);
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(mDrawToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
+        switch(item.getItemId()) {
+            case R.id.action_websearch:
+                Intent intent = new Intent();
+                intent.setAction("android.intent.action.VIEW");
+                Uri uri = Uri.parse("http://www.baidu.com");
+                intent.setData(uri);
+                startActivity(intent);
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        mDrawToggle.syncState();
+    }
+
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mDrawToggle.onConfigurationChanged(newConfig);
+    }
+
+}
