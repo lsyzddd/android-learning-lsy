@@ -1,0 +1,3 @@
+1.把android的工程目录先切换为android的形式
+2.打开Gradle Scripts中的build.gradle(Module:app)
+3.修改其中的minSdkVersion的值为需要兼容的版本的sdk值
