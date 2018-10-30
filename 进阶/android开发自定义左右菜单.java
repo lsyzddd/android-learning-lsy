@@ -14,6 +14,7 @@ public class CustomSlidingMenu extends FragmentActivity {
         mainUI = new MainUI(this);
         setContentView(mainUI);
         leftMenu = new LeftMenuActivity();
+        //给对应的布局添加对应的视图组件
         getSupportFragmentManager().beginTransaction().add(MainUI.LEFT_ID,leftMenu).commit();
     }
 
